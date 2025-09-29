@@ -8,26 +8,37 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:            
-    runs-on: ubuntu-latest  
+  build:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: esg_dashboard
+        ports: [ "3306:3306" ]
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
 
     steps:
-      # Step 1: Pull your repo code into that VM
       - uses: actions/checkout@v3
 
-      # Step 2: Install JDK (Java Development Kit 17)
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'   
-          java-version: '17'
+          distribution: 'temurin'
+          java-version: 17
 
-      # Step 3: Build backend with Maven (compile + package)
-      - name: Build Backend with Maven
-        working-directory: ./server
-        run: mvn -B clean install
+      - name: Wait for MySQL
+        run: |
+          sudo apt-get install -y mysql-client
+          until mysql -h 127.0.0.1 -P 3306 -uroot -ppassword -e "SELECT 1"; do
+              sleep 5
+          done
 
-      # Step 4: Run backend tests (JUnit)
-      - name: Run Backend Tests
-        working-directory: ./server
-        run: mvn test
+      - name: Build Backend
+        working-directory: ./backend
+        run: mvn clean verify
