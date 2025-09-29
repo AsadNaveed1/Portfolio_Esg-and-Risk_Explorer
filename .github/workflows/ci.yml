@@ -13,8 +13,8 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: esg_dashboard
+          MYSQL_ROOT_PASSWORD: rootpass     # match application.properties
+          MYSQL_DATABASE: portfolio_db      # match application.properties
         ports: [ "3306:3306" ]
         options: >-
           --health-cmd="mysqladmin ping -h localhost"
