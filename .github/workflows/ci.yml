@@ -24,10 +24,10 @@ jobs:
 
       # Step 3: Build backend with Maven (compile + package)
       - name: Build Backend with Maven
-        working-directory: ./backend
+        working-directory: ./server
         run: mvn -B clean install
 
       # Step 4: Run backend tests (JUnit)
       - name: Run Backend Tests
-        working-directory: ./backend
+        working-directory: ./server
         run: mvn test
