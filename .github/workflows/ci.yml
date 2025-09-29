@@ -1,6 +1,5 @@
-name: CI Pipeline   # A friendly name for the workflow
+name: CI Pipeline   
 
-# When should this CI run?
 on:
   push:             
     branches: [ "main" ]
@@ -40,5 +39,5 @@ jobs:
           done
 
       - name: Build Backend
-        working-directory: ./backend
+        working-directory: ./server
         run: mvn clean verify
