@@ -57,7 +57,9 @@ jobs:
           mysql -h 127.0.0.1 -P 3306 -u root --password=rootpass -e "USE portfolio_db; SELECT 'Database is ready' as status;"
 
       - name: Build with Maven
-        run: mvn -B clean verify -Dspring.profiles.active=test
+        run: |
+          cd server
+          mvn -B clean verify -Dspring.profiles.active=test
         env:
           SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/portfolio_db
           SPRING_DATASOURCE_USERNAME: root
