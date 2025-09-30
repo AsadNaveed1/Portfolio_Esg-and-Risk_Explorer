@@ -29,6 +29,7 @@ export default function StressTestView({ portfolioId }: StressTestViewProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
+  const [originalTotal, setOriginalTotal] = useState<number>(100); // Default fallback
 
   const scenarioInfo: Record<keyof StressTestResults, ScenarioInfo> = {
     "oil-shock": {
@@ -65,6 +66,12 @@ export default function StressTestView({ portfolioId }: StressTestViewProps) {
       try {
         setLoading(true);
         setError(null);
+
+        // First get the breakdown to calculate original total
+        const sectorResponse = await api.get(`/${portfolioId}/breakdown/sector`);
+        const total = Object.values(sectorResponse.data as Record<string, number>)
+          .reduce((sum, value) => sum + value, 0);
+        setOriginalTotal(total);
 
         const promises = Object.keys(results).map(async (scenario) => {
           try {
@@ -105,8 +112,8 @@ export default function StressTestView({ portfolioId }: StressTestViewProps) {
       .filter(([, value]) => value !== null)
       .map(([scenario, value]) => ({
         name: scenarioInfo[scenario as keyof StressTestResults].name,
-        value: (value as number) * 100,
-        impact: 100 - ((value as number) * 100),
+        value: value as number, // Keep as raw percentage points
+        impact: originalTotal - (value as number), // Calculate absolute loss
         color: scenarioInfo[scenario as keyof StressTestResults].color,
         scenario
       }))
@@ -135,18 +142,24 @@ export default function StressTestView({ portfolioId }: StressTestViewProps) {
     const validResults = Object.entries(results).filter(([, value]) => value !== null) as Array<[string, number]>;
     if (validResults.length === 0) return 0;
     
-    const avgImpact = validResults.reduce((sum, [, value]) => sum + (1 - value), 0) / validResults.length;
-    return avgImpact * 100;
+    // Calculate average loss percentage
+    const avgLoss = validResults.reduce((sum, [, value]) => {
+        const lossPercent = ((originalTotal - (value as number)) / originalTotal) * 100;
+        return sum + lossPercent;
+    }, 0) / validResults.length;
+    
+    return Math.max(0, avgLoss); // Ensure non-negative
   };
 
   const CustomTooltip = ({ active, payload, label }: StressTestTooltipProps) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
+      const lossPercent = ((originalTotal - data.value) / originalTotal * 100);
       return (
         <TooltipContainer>
           <TooltipTitle>{label}</TooltipTitle>
-          <TooltipValue>Portfolio Value: {data.value.toFixed(1)}%</TooltipValue>
-          <TooltipImpact>Potential Loss: {data.impact.toFixed(1)}%</TooltipImpact>
+          <TooltipValue>Portfolio Value: {data.value.toFixed(1)} points</TooltipValue>
+          <TooltipImpact>Potential Loss: {lossPercent.toFixed(1)}%</TooltipImpact>
         </TooltipContainer>
       );
     }
@@ -193,7 +206,7 @@ export default function StressTestView({ portfolioId }: StressTestViewProps) {
         <RiskMeter>
           <RiskMeterTitle>Overall Risk Score</RiskMeterTitle>
           <RiskScore $risk={riskScore}>
-            {riskScore.toFixed(0)}
+            {riskScore.toFixed(0)}%
           </RiskScore>
           <RiskLabel $risk={riskScore}>
             {riskScore > 40 ? 'High Risk' : riskScore > 20 ? 'Medium Risk' : 'Low Risk'}
@@ -208,7 +221,7 @@ export default function StressTestView({ portfolioId }: StressTestViewProps) {
             <SummaryContent>
               <SummaryTitle>Worst Case Scenario</SummaryTitle>
               <SummaryValue $color="#dc2626">
-                {worstCase ? `${(worstCase.value * 100).toFixed(1)}%` : 'N/A'}
+                {worstCase ? `${worstCase.value.toFixed(1)} pts` : 'N/A'}
               </SummaryValue>
               <SummarySubtext>
                 {worstCase ? scenarioInfo[worstCase.scenario as keyof StressTestResults].name : 'No data'}
@@ -221,7 +234,7 @@ export default function StressTestView({ portfolioId }: StressTestViewProps) {
             <SummaryContent>
               <SummaryTitle>Best Case Scenario</SummaryTitle>
               <SummaryValue $color="#059669">
-                {bestCase ? `${(bestCase.value * 100).toFixed(1)}%` : 'N/A'}
+                {bestCase ? `${bestCase.value.toFixed(1)} pts` : 'N/A'}
               </SummaryValue>
               <SummarySubtext>
                 {bestCase ? scenarioInfo[bestCase.scenario as keyof StressTestResults].name : 'No data'}
@@ -255,7 +268,7 @@ export default function StressTestView({ portfolioId }: StressTestViewProps) {
                   axisLine={{ stroke: '#e2e8f0' }}
                 />
                 <YAxis 
-                  domain={[0, 100]}
+                  domain={[0, originalTotal]}
                   tick={{ fontSize: 12, fill: '#64748b' }}
                   axisLine={{ stroke: '#e2e8f0' }}
                 />
@@ -276,6 +289,7 @@ export default function StressTestView({ portfolioId }: StressTestViewProps) {
             {Object.entries(results).map(([scenario, value]) => {
               const info = scenarioInfo[scenario as keyof StressTestResults];
               const isSelected = selectedScenario === scenario;
+              const lossPercent = value ? ((originalTotal - value) / originalTotal * 100) : 0;
               
               return (
                 <ScenarioCard 
@@ -295,10 +309,10 @@ export default function StressTestView({ portfolioId }: StressTestViewProps) {
                       ) : (
                         <>
                           <ResultValue $color={info.color}>
-                            {(value * 100).toFixed(1)}%
+                            {value.toFixed(1)} pts
                           </ResultValue>
                           <ResultImpact>
-                            {((1 - value) * 100).toFixed(1)}% loss
+                            {lossPercent.toFixed(1)}% loss
                           </ResultImpact>
                         </>
                       )}
