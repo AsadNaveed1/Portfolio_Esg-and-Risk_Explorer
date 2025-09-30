@@ -1,13 +1,15 @@
 package com.esg.risk.backend.service;
 
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.MakeBucketArgs;
-import io.minio.BucketExistsArgs;
+import java.io.InputStream;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.InputStream;
+import io.minio.BucketExistsArgs;
+import io.minio.GetObjectArgs;
+import io.minio.MakeBucketArgs;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
 
 @Service
 public class MinioService {
@@ -44,5 +46,16 @@ public class MinioService {
                         .build()
         );
         return String.format("%s/%s", bucketName, objectName);
+
+        
     }
+
+    public InputStream getFile(String objectName) throws Exception {
+    return minioClient.getObject(
+            GetObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(objectName)
+                    .build()
+    );
+}
 }

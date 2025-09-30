@@ -1,19 +1,43 @@
-// client/src/components/Dashboard.tsx
 import { useState } from 'react';
 import styled from 'styled-components';
 import ESGView from './ESGView';
 import BreakdownView from './BreakdownView';
 import StressTestView from './StressTestView';
 import type { DashboardTab } from '../types';
+import { generateCsvReport, downloadReport } from '../api';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('esg');
+  const [downloading, setDownloading] = useState(false);
 
   const tabs: DashboardTab[] = [
     { id: 'esg', label: 'ESG Score', icon: '🌱' },
     { id: 'breakdown', label: 'Portfolio Breakdown', icon: '📊' },
     { id: 'stress', label: 'Stress Tests', icon: '⚡' }
   ];
+
+  const handleDownloadReport = async () => {
+    try {
+      setDownloading(true);
+      const portfolioId = 1;
+      const report = await generateCsvReport(portfolioId);
+
+      const fileResp = await downloadReport(report.id);
+
+      const url = window.URL.createObjectURL(new Blob([fileResp.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `portfolio-${portfolioId}-report.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error("Report download failed", err);
+      alert("Failed to download report");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <AppContainer>
@@ -23,7 +47,12 @@ export default function Dashboard() {
             <LogoIcon>PE</LogoIcon>
             <AppTitle>Portfolio ESG & Risk Explorer</AppTitle>
           </Logo>
-          <PortfolioInfo>Portfolio ID: 1</PortfolioInfo>
+          <Actions>
+            <PortfolioInfo>Portfolio ID: 1</PortfolioInfo>
+            <DownloadButton onClick={handleDownloadReport} disabled={downloading}>
+              {downloading ? "Generating..." : "📥 Download Report"}
+            </DownloadButton>
+          </Actions>
         </HeaderContent>
       </Header>
 
@@ -53,7 +82,7 @@ export default function Dashboard() {
   );
 }
 
-// Styled Components with Professional Design
+
 const AppContainer = styled.div`
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -104,10 +133,38 @@ const AppTitle = styled.h1`
   margin: 0;
 `;
 
+const Actions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`;
+
 const PortfolioInfo = styled.div`
   color: #718096;
   font-size: 14px;
   font-weight: 500;
+`;
+
+const DownloadButton = styled.button`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(102, 126, 234, 0.3);
+
+  &:hover:enabled {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 `;
 
 const Navigation = styled.nav`
