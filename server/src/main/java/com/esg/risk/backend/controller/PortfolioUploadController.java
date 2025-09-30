@@ -5,33 +5,30 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.esg.risk.backend.repository.PortfolioRepository;
-import com.esg.risk.backend.repository.HoldingRepository;
-import com.esg.risk.backend.model.Portfolio;
 import com.esg.risk.backend.model.Holding;
+import com.esg.risk.backend.model.Portfolio;
+import com.esg.risk.backend.repository.HoldingRepository;
+import com.esg.risk.backend.repository.PortfolioRepository;
 import com.esg.risk.backend.service.MinioService;
 
 @RestController
 @RequestMapping("/api/portfolios")
 public class PortfolioUploadController {
 
-    private final PortfolioRepository portfolioRepo;
-    private final HoldingRepository holdingRepo;
-    private final MinioService minioService;
+    @Autowired
+    private PortfolioRepository portfolioRepo;
+    @Autowired
+    private HoldingRepository holdingRepo;
+    @Autowired
+    private MinioService minioService;
 
-    public PortfolioUploadController(PortfolioRepository portfolioRepo,
-            HoldingRepository holdingRepo,
-            MinioService minioService) {
-        this.portfolioRepo = portfolioRepo;
-        this.holdingRepo = holdingRepo;
-        this.minioService = minioService;
-    }
 
     @PostMapping("/upload")
     public Portfolio uploadPortfolio(@RequestParam("file") MultipartFile file) throws Exception {

@@ -1,3 +1,13 @@
 /Users/asad/Documents/Project/Portfolio_Esg-and-Risk_Explorer/server/src/main/java/com/esg/risk/backend/BackendApplication.java
+/Users/asad/Documents/Project/Portfolio_Esg-and-Risk_Explorer/server/src/main/java/com/esg/risk/backend/controller/BreakdownController.java
+/Users/asad/Documents/Project/Portfolio_Esg-and-Risk_Explorer/server/src/main/java/com/esg/risk/backend/controller/ESGController.java
+/Users/asad/Documents/Project/Portfolio_Esg-and-Risk_Explorer/server/src/main/java/com/esg/risk/backend/controller/PortfolioUploadController.java
+/Users/asad/Documents/Project/Portfolio_Esg-and-Risk_Explorer/server/src/main/java/com/esg/risk/backend/controller/StressTestController.java
 /Users/asad/Documents/Project/Portfolio_Esg-and-Risk_Explorer/server/src/main/java/com/esg/risk/backend/model/Holding.java
 /Users/asad/Documents/Project/Portfolio_Esg-and-Risk_Explorer/server/src/main/java/com/esg/risk/backend/model/Portfolio.java
+/Users/asad/Documents/Project/Portfolio_Esg-and-Risk_Explorer/server/src/main/java/com/esg/risk/backend/repository/HoldingRepository.java
+/Users/asad/Documents/Project/Portfolio_Esg-and-Risk_Explorer/server/src/main/java/com/esg/risk/backend/repository/PortfolioRepository.java
+/Users/asad/Documents/Project/Portfolio_Esg-and-Risk_Explorer/server/src/main/java/com/esg/risk/backend/service/BreakdownService.java
+/Users/asad/Documents/Project/Portfolio_Esg-and-Risk_Explorer/server/src/main/java/com/esg/risk/backend/service/ESGService.java
+/Users/asad/Documents/Project/Portfolio_Esg-and-Risk_Explorer/server/src/main/java/com/esg/risk/backend/service/MinioService.java
+/Users/asad/Documents/Project/Portfolio_Esg-and-Risk_Explorer/server/src/main/java/com/esg/risk/backend/service/StressTestService.java
