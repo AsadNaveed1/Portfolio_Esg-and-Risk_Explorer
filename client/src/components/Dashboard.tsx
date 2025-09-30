@@ -1,14 +1,18 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import styled from 'styled-components';
 import ESGView from './ESGView';
 import BreakdownView from './BreakdownView';
 import StressTestView from './StressTestView';
 import type { DashboardTab } from '../types';
-import { generateCsvReport, downloadReport } from '../api';
+import { generateXlsxReport, downloadReport } from '../api';
+import axios from 'axios';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('esg');
   const [downloading, setDownloading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [currentPortfolioId, setCurrentPortfolioId] = useState(1);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const tabs: DashboardTab[] = [
     { id: 'esg', label: 'ESG Score', icon: '🌱' },
@@ -19,18 +23,17 @@ export default function Dashboard() {
   const handleDownloadReport = async () => {
     try {
       setDownloading(true);
-      const portfolioId = 1;
-      const report = await generateCsvReport(portfolioId);
-
+      const report = await generateXlsxReport(currentPortfolioId);
       const fileResp = await downloadReport(report.id);
 
       const url = window.URL.createObjectURL(new Blob([fileResp.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `portfolio-${portfolioId}-report.csv`);
+      link.setAttribute("download", `portfolio-${currentPortfolioId}-report.xlsx`);
       document.body.appendChild(link);
       link.click();
       link.remove();
+      window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error("Report download failed", err);
       alert("Failed to download report");
@@ -39,8 +42,58 @@ export default function Dashboard() {
     }
   };
 
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
+      alert('Please select an Excel file (.xlsx)');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      setUploading(true);
+      const uploadUrl = window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1" 
+        ? '/api/portfolios/upload' 
+        : 'http://localhost:8080/api/portfolios/upload';
+        
+      const response = await axios.post(uploadUrl, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      setCurrentPortfolioId(response.data.id);
+      setActiveTab('esg');
+      alert(`Portfolio uploaded successfully! Now viewing Portfolio ID: ${response.data.id}`);
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert('Upload failed. Please try again.');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
     <AppContainer>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".xlsx"
+        onChange={handleFileSelect}
+        style={{ display: 'none' }}
+      />
+
       <Header>
         <HeaderContent>
           <Logo>
@@ -48,9 +101,12 @@ export default function Dashboard() {
             <AppTitle>Portfolio ESG & Risk Explorer</AppTitle>
           </Logo>
           <Actions>
-            <PortfolioInfo>Portfolio ID: 1</PortfolioInfo>
+            <PortfolioInfo>Portfolio ID: {currentPortfolioId}</PortfolioInfo>
+            <UploadButton onClick={handleUploadClick} disabled={uploading}>
+              {uploading ? "Uploading..." : "📤 Upload Portfolio"}
+            </UploadButton>
             <DownloadButton onClick={handleDownloadReport} disabled={downloading}>
-              {downloading ? "Generating..." : "📥 Download Report"}
+              {downloading ? "Generating..." : "📥 Download Excel Report"}
             </DownloadButton>
           </Actions>
         </HeaderContent>
@@ -73,15 +129,14 @@ export default function Dashboard() {
 
       <MainContent>
         <ContentCard>
-          {activeTab === 'esg' && <ESGView portfolioId={1} />}
-          {activeTab === 'breakdown' && <BreakdownView portfolioId={1} />}
-          {activeTab === 'stress' && <StressTestView portfolioId={1} />}
+          {activeTab === 'esg' && <ESGView portfolioId={currentPortfolioId} />}
+          {activeTab === 'breakdown' && <BreakdownView portfolioId={currentPortfolioId} />}
+          {activeTab === 'stress' && <StressTestView portfolioId={currentPortfolioId} />}
         </ContentCard>
       </MainContent>
     </AppContainer>
   );
 }
-
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -104,6 +159,13 @@ const HeaderContent = styled.div`
   align-items: center;
   justify-content: space-between;
   height: 70px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    height: auto;
+    padding: 16px 24px;
+    gap: 16px;
+  }
 `;
 
 const Logo = styled.div`
@@ -131,18 +193,50 @@ const AppTitle = styled.h1`
   font-weight: 600;
   color: #2d3748;
   margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 20px;
+  }
 `;
 
 const Actions = styled.div`
   display: flex;
   align-items: center;
   gap: 16px;
+  
+  @media (max-width: 768px) {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 `;
 
 const PortfolioInfo = styled.div`
   color: #718096;
   font-size: 14px;
   font-weight: 500;
+`;
+
+const UploadButton = styled.button`
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(72, 187, 120, 0.3);
+  font-size: 14px;
+
+  &:hover:enabled {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 `;
 
 const DownloadButton = styled.button`
@@ -155,6 +249,7 @@ const DownloadButton = styled.button`
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 3px 8px rgba(102, 126, 234, 0.3);
+  font-size: 14px;
 
   &:hover:enabled {
     transform: scale(1.05);
@@ -178,6 +273,11 @@ const NavContent = styled.div`
   padding: 0 24px;
   display: flex;
   gap: 8px;
+  
+  @media (max-width: 768px) {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 `;
 
 const TabButton = styled.button<{ $active: boolean }>`

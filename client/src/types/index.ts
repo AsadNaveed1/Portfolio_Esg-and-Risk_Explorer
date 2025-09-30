@@ -73,3 +73,14 @@ export interface DashboardTab {
   label: string;
   icon: string;
 }
+
+export interface Portfolio {
+  id: number;
+  name: string;
+  uploadDate: string;
+  s3Path: string;
+}
+
+export interface PortfolioUploadProps {
+  onUploadSuccess: (portfolio: Portfolio) => void;
+}

@@ -45,17 +45,15 @@ public class MinioService {
                         .contentType(contentType)
                         .build()
         );
-        return String.format("%s/%s", bucketName, objectName);
-
-        
+        return objectName;
     }
 
     public InputStream getFile(String objectName) throws Exception {
-    return minioClient.getObject(
-            GetObjectArgs.builder()
-                    .bucket(bucketName)
-                    .object(objectName)
-                    .build()
-    );
-}
+        return minioClient.getObject(
+                GetObjectArgs.builder()
+                        .bucket(bucketName)
+                        .object(objectName)
+                        .build()
+        );
+    }
 }

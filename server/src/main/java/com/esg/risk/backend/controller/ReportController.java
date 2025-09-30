@@ -26,12 +26,12 @@ public class ReportController {
     private MinioService minioService;
 
     /**
-     * Generate CSV report
-     * Example: POST /api/portfolios/1/report/csv
+     * Generate XLSX report
+     * Example: POST /api/portfolios/1/report/xlsx
      */
-    @PostMapping("/{id}/report/csv")
-    public Report generateCsv(@PathVariable Long id) throws Exception {
-        return reportService.generateCsvReport(id);
+    @PostMapping("/{id}/report/xlsx")
+    public Report generateXlsx(@PathVariable Long id) throws Exception {
+        return reportService.generateXlsxReport(id);
     }
 
     /**
@@ -56,9 +56,8 @@ public class ReportController {
             byte[] content = in.readAllBytes();
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=" + report.getReportType() + "-report.csv")
-                    .header(HttpHeaders.CONTENT_TYPE, "text/csv")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=portfolio-report.xlsx")
+                    .header(HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
                     .body(content);
         }
     }

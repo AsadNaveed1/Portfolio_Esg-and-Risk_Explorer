@@ -11,8 +11,8 @@ const api = axios.create({
   baseURL: getBaseURL(),
 });
 
-export const generateCsvReport = async (portfolioId: number) => {
-  const resp = await api.post(`/${portfolioId}/report/csv`);
+export const generateXlsxReport = async (portfolioId: number) => {
+  const resp = await api.post(`/${portfolioId}/report/xlsx`);
   return resp.data;
 };
 
