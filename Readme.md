@@ -13,6 +13,7 @@ A full-stack application for analyzing investment portfolios with ESG scoring, s
 ## 📋 Table of Contents
 
 - [Features](#features)
+- [Screenshots](#screenshots)
 - [Tech Stack](#tech-stack)
 - [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
@@ -31,6 +32,18 @@ A full-stack application for analyzing investment portfolios with ESG scoring, s
 - **Stress Testing**: Simulate portfolio performance under adverse market scenarios
 - **Excel Reports**: Generate comprehensive XLSX reports with complete portfolio analysis
 - **File Upload**: Import portfolio data via Excel files
+
+---
+
+## Screenshots
+
+### ESG Score
+![ESG Score](docs/images/Img1.png)
+### Portfolio Breakdown
+![Portfolio Breakdown](docs/images/Img2.png)
+### Stress Test
+![Stress Test](docs/images/Img3.png)
+![Stress Test](docs/images/Img4.png)
 
 ---
 
