@@ -38,12 +38,12 @@ A full-stack application for analyzing investment portfolios with ESG scoring, s
 ## Screenshots
 
 ### ESG Score
-![ESG Score](docs/images/Img1.png)
+![ESG Score](Docs/images/Img1.png)
 ### Portfolio Breakdown
-![Portfolio Breakdown](docs/images/Img2.png)
+![Portfolio Breakdown](Docs/images/Img2.png)
 ### Stress Test
-![Stress Test](docs/images/Img3.png)
-![Stress Test](docs/images/Img4.png)
+![Stress Test](Docs/images/Img3.png)
+![Stress Test](Docs/images/Img4.png)
 
 ---
 
