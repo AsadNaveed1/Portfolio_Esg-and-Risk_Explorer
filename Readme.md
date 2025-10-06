@@ -1,5 +1,7 @@
 # Portfolio ESG & Risk Explorer
 
+A full-stack application for analyzing investment portfolios with ESG scoring, sector/regional breakdown visualization, and stress testing capabilities.
+
 ![React](https://img.shields.io/badge/React-18.x-blue?logo=react)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-green?logo=spring)
 ![Java](https://img.shields.io/badge/Java-17-orange?logo=openjdk)
@@ -8,7 +10,6 @@
 ![AWS](https://img.shields.io/badge/Deployed%20on-AWS-232F3E?logo=amazon-aws&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-A full-stack application for analyzing investment portfolios with ESG scoring, sector/regional breakdown visualization, and stress testing capabilities.
 
 ## 📋 Table of Contents
 
